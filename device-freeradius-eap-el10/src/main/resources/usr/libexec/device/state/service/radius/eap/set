@@ -1,0 +1,23 @@
+#!/bin/sh
+  
+set -e
+umask 0002
+
+OPTIONS="--default none --symlink-base /usr/share/device/state/service/radius/eap/eap-type/ --symlink default-eap-type \
+         --symlink-base /etc/pki/tls/certs --symlink-suffix .crt --symlink ca-certificate \
+         --relation-base /etc/device/system/pki/certificates --relation-name name --relation-suffix .txt --relation certificate \
+         --lock /etc/device/service/radius/"
+
+if [ "$1" == "--" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+  /usr/bin/sudo /usr/bin/systemctl try-reload-or-restart freeradius-autodiscovery.service
+
+elif [ "$1" == "-c" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+fi
+
+

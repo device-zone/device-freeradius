@@ -1,0 +1,21 @@
+#!/bin/sh
+  
+set -e
+umask 0002
+
+OPTIONS="--mark suffix \
+         --relation-base /etc/device/services/ldap/suffix --relation-name name --relation-suffix .txt --relation suffix \
+         --lock /etc/device/system/auth/"
+
+if [ "$1" == "--" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+  /usr/bin/sudo /usr/bin/systemctl try-reload-or-restart freeradius-autodiscovery.service
+
+elif [ "$1" == "-c" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+fi
+

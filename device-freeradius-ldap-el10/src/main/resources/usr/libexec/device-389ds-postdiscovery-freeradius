@@ -1,0 +1,82 @@
+#!/bin/bash
+
+#
+# 389 Directory Server Postdiscovery - radiusd user
+# =================================================
+#
+# This script adds radiusd user to instances.
+
+set -e
+
+request="${1}"
+instance="${2}"
+
+uris="ldapi://%2frun%2fslapd-${instance}.socket"
+
+
+#
+# Autogenerate the radiusd user
+# -----------------------------
+#
+# If the LDAP server is local, we need to create the radiusd user in
+# LDAP so autobind works.
+
+logger -t "${0}" "Notice: Adding radiusd user on instance '${instance}'..."
+
+dsidm -b "cn=config" ${uris} organizationalunit create --ou people >/dev/null || /bin/true
+
+dsidm -b "cn=config" ${uris} user create --uid radiusd --cn radiusd --displayName "Radius Server" --uidNumber `id -u radiusd` --gidNumber `id -g radiusd` --homeDirectory "`echo ~radiusd`" >/dev/null || /bin/true
+
+aci='(targetattr = "*")(version 3.0;acl "Radius Daemon";allow (read,search,compare) (userdn = "ldap:///uid=radiusd,ou=people,cn=config");)'
+
+logger -t "${0}" "Notice: attempting to add radiusd aci on instance '${instance}'..."
+logger -t "${0}" "Notice: radiusd aci: ${aci}"
+
+find /etc/device/services/ldap/suffix/ -mindepth 1 -maxdepth 1 -type l | \
+while read line; do
+
+  target=$(readlink -f "$line")
+
+  if test ! -f "$line/suffix.txt"; then
+    continue;
+  fi
+  suffix="$(head $line/suffix.txt)"
+
+  if [ ! -e "$line/instance.d/name.txt" ]; then
+    continue;
+  fi
+  if [ "${instance}" != "$(head -n 1 $line/instance.d/name.txt)" ]; then
+    continue;
+  fi
+
+  existing=$(ldapsearch -H ${uris} -Y EXTERNAL -b "${suffix}" -o ldif-wrap=no -s base "(aci=*)" aci | grep "ldap:///uid=radiusd,ou=people,cn=config" || /bin/true)
+
+  if [ -z "${existing}" ]; then
+
+    ldapmodify -H ${uris} -Y EXTERNAL -c <<- EOF || true
+dn: ${suffix}
+changetype: modify
+add: aci
+aci: ${aci}
+
+EOF
+
+  else
+
+    ldapmodify -H ${uris} -Y EXTERNAL -c <<- EOF || true
+dn: ${suffix}
+changetype: modify
+delete: aci
+${existing}
+-
+add: aci
+aci: ${aci}
+
+EOF
+
+  fi
+
+done
+
+logger -t "${0}" "Notice: Added radiusd user to local LDAP instance '${instance}'."
+

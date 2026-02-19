@@ -1,0 +1,25 @@
+#!/bin/sh
+
+#
+# Freeradius Server Autodiscovery - Clean
+# =======================================
+#
+# This script cleans all previously created configuration
+
+set -e
+umask 0007
+
+# remove any prior configuration and start clean
+find /etc/raddb/mods-enabled/ -type l -mindepth 1 -delete
+find /etc/raddb/sites-enabled/ -type l -mindepth 1 -delete
+
+# add mandatory modules
+ln -s ../mods-available/always /etc/raddb/mods-enabled/always
+ln -s ../mods-available/attr_filter /etc/raddb/mods-enabled/attr_filter
+ln -s ../mods-available/date /etc/raddb/mods-enabled/date
+ln -s ../mods-available/expiration /etc/raddb/mods-enabled/expiration
+ln -s ../mods-available/expr /etc/raddb/mods-enabled/expr
+ln -s ../mods-available/logintime /etc/raddb/mods-enabled/logintime
+ln -s ../mods-available/unpack /etc/raddb/mods-enabled/unpack
+ln -s ../mods-available/utf8 /etc/raddb/mods-enabled/utf8
+

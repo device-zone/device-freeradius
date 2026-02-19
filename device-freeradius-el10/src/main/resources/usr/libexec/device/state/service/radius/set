@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+umask 0002
+
+OPTIONS="--lock /etc/device/service/radius/ \
+         --polar disabled"
+
+if [ "$1" == "--" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+  if test -f "disabled.polar"; then
+    if systemctl is-active --quiet freeradius-autodiscovery.service; then
+      /usr/bin/sudo /usr/bin/systemctl try-reload-or-restart freeradius-autodiscovery.service
+    else
+      echo "radius will be disabled on next reboot."
+    fi
+  else
+    if systemctl is-active --quiet freeradius-autodiscovery.service; then
+      /usr/bin/sudo /usr/bin/systemctl try-reload-or-restart freeradius-autodiscovery.service
+    else
+      echo "radius will be enabled on next reboot."
+    fi
+  fi
+
+elif [ "$1" == "-c" ]; then
+
+  /usr/libexec/device-tool ${OPTIONS} "$@"
+
+fi
+

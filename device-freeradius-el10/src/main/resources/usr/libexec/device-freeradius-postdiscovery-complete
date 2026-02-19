@@ -1,0 +1,13 @@
+#!/bin/sh
+
+#
+# Freeradius Server Postdiscovery - Complete
+# ==========================================
+#
+# This script completes added / updated / removed.
+
+set -e
+umask 0007
+
+rm -f /etc/device/service/radius/.updated
+

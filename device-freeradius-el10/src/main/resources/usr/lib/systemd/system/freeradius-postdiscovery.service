@@ -1,0 +1,16 @@
+# systemd service for managing all freeradius postconfiguration.
+
+[Unit]
+Description=Freeradius Configuration Postdiscovery
+After=radiusd.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sequence -l /etc/device/service/radius/ -s daemon.info -b /usr/libexec device/postdiscovery/freeradius.d start
+ExecReload=/usr/bin/sequence -l /etc/device/service/radius/ -s daemon.info -b /usr/libexec device/postdiscovery/freeradius.d reload
+RemainAfterExit=on
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

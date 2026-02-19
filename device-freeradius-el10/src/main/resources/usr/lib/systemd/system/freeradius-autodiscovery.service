@@ -1,0 +1,18 @@
+# systemd service for managing all freeradius autoconfiguration.
+
+[Unit]
+Description=Freeradius Server Configuration Autodiscovery
+Before=radiusd.service
+After=firewalld.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sequence -l /etc/device/service/radius/ -s daemon.info -b /usr/libexec device/autodiscovery/freeradius.d start
+ExecReload=/usr/bin/sequence -l /etc/device/service/radius/ -s daemon.info -b /usr/libexec device/autodiscovery/freeradius.d reload
+ExecStop=/usr/bin/sequence -l /etc/device/service/radius/ -s daemon.info -b /usr/libexec device/autodiscovery/freeradius.d stop
+RemainAfterExit=on
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
+

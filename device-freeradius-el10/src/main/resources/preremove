@@ -1,0 +1,7 @@
+if [ $1 = 0 ]; then
+  /usr/bin/systemctl stop freeradius-postdiscovery.service
+  /usr/bin/systemctl stop freeradius-autodiscovery.service
+  /usr/bin/systemctl disable freeradius-postdiscovery.service
+  /usr/bin/systemctl disable freeradius-autodiscovery.service
+fi
+
