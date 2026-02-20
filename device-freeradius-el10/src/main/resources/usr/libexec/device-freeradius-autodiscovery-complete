@@ -128,8 +128,8 @@ if test "$1" = "start" -o "$1" = "reload"; then
       ln -s "../sites-available/device-server" "/etc/raddb/sites-enabled/device-server"
     fi
     logger -t freeradius-autodiscovery "enabled freeradius."
-    systemctl --no-block try-restart "radiusd"
-    systemctl --no-block try-restart "freeradius-postdiscovery"
+    systemctl --no-block reload-or-restart "radiusd"
+    systemctl --no-block reload-or-restart "freeradius-postdiscovery"
   else
     rm -f /etc/raddb/sites-enabled/device-server
     systemctl --no-block stop "freeradius-postdiscovery"
@@ -139,7 +139,7 @@ if test "$1" = "start" -o "$1" = "reload"; then
 
 elif test "$1" = "stop"; then
 
-  if test -f "/etc/device/system/dns/resolver/disabled.polar"; then
+  if test -f "/etc/device/service/radius/disabled.polar"; then
     rm -f /etc/raddb/sites-enabled/device-server
     systemctl --no-block stop "freeradius-postdiscovery"
     systemctl --no-block stop "radiusd"

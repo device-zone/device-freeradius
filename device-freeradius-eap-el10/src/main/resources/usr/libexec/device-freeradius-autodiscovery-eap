@@ -123,7 +123,7 @@ if test "$1" = "start"; then
 
 elif test "$1" = "stop"; then
 
-  if test -f "/etc/device/system/dns/resolver/disabled.polar"; then
+  if test -f "/etc/device/service/radius/disabled.polar"; then
 
     rm -f /etc/raddb/mods-enabled/device-eap
 
